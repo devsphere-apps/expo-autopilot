@@ -224,7 +224,7 @@ async function findExportsInProject(paths: string[], identifiers: string[]): Pro
 
       // Check if file exports any of our identifiers
       for (const identifier of identifiers) {
-        if (exports.has(identifier)) continue; // Skip if we already found this export
+        if (exports.has(identifier)) {continue;} // Skip if we already found this export
 
         let isDefault = false;
         let isNamed = false;
@@ -336,7 +336,7 @@ function getImportPaths(root: string, structure: 'src' | 'root'): string[] {
 }
 
 async function addImports(editor: vscode.TextEditor, exports: ExportInfo[]): Promise<void> {
-  if (!exports.length) return;
+  if (!exports.length) {return;}
 
   // Group imports by their categories
   const importGroups = {
@@ -400,25 +400,33 @@ async function addImports(editor: vscode.TextEditor, exports: ExportInfo[]): Pro
 
     // 2. React Native imports
     if (importGroups.reactNative.size > 0) {
-      if (importStatements) importStatements += '\n';
+      if (importStatements) {
+        importStatements += '\n';
+      }
       importStatements += addGroupImports(importGroups.reactNative) + '\n';
     }
 
     // 3. Third-party modules
     if (importGroups.thirdParty.size > 0) {
-      if (importStatements) importStatements += '\n';
+      if (importStatements) {
+        importStatements += '\n';
+      }
       importStatements += addGroupImports(importGroups.thirdParty) + '\n';
     }
 
     // 4. Components/Screens
     if (importGroups.components.size > 0) {
-      if (importStatements) importStatements += '\n';
+      if (importStatements) {
+        importStatements += '\n';
+      }
       importStatements += addGroupImports(importGroups.components) + '\n';
     }
 
     // 5. Utils/Helpers/APIs
     if (importGroups.utils.size > 0) {
-      if (importStatements) importStatements += '\n';
+      if (importStatements) {
+        importStatements += '\n';
+      }
       importStatements += addGroupImports(importGroups.utils) + '\n';
     }
 
