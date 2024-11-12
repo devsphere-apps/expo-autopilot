@@ -1,71 +1,59 @@
-# expo-autopilot README
+# Auto Import Extension for VSCode
 
-This is the README for your extension "expo-autopilot". After writing up a brief description, we recommend including the following sections.
+Welcome to the **Auto Import Extension** for Visual Studio Code! This powerful tool is designed to streamline your development workflow by automatically detecting and importing missing modules, components, utilities, and more in your TypeScript and JavaScript projects.
 
-## Features
+## 🚀 Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+- **Automatic Import Detection**: Scans your open file for any missing imports and automatically adds them.
+- **Supports All File Types**: Whether it's a React component, utility function, API module, or constant, this extension has you covered.
+- **Smart Import Grouping**: Organizes imports into logical groups, such as React, third-party libraries, and local modules, following best practices.
+- **Alias and Relative Path Support**: Handles both alias-based and relative imports seamlessly, respecting your project's configuration.
+- **Customizable Import Order**: Ensures imports are ordered according to your preferred structure, enhancing code readability.
 
-For example if there is an image subfolder under your extension project workspace:
+## 🛠️ How It Works
 
-\!\[feature X\]\(images/feature-x.png\)
+1. **Analyze**: The extension analyzes your current file to identify any used identifiers that are not yet imported.
+2. **Search**: It searches through your project directories to find matching exports for these identifiers.
+3. **Import**: Automatically adds the necessary import statements at the top of your file, organized and formatted.
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+## 📦 Installation
 
-## Requirements
+1. Open Visual Studio Code.
+2. Go to the Extensions view by clicking on the Extensions icon in the Activity Bar on the side of the window or by pressing `Ctrl+Shift+X`.
+3. Search for "Auto Import Extension" and click Install.
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+## 🖱️ Usage
 
-## Extension Settings
+- **Command Palette**: Open the Command Palette (`Ctrl+Shift+P` or `Cmd+Shift+P` on macOS), type "Auto Import", and select the command to run it.
+- **Keyboard Shortcut**: Use the default shortcut `Ctrl+Shift+I` (or `Cmd+Shift+I` on macOS) to trigger the auto-import functionality.
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+## ⚙️ Configuration
 
-For example:
+The extension respects your project's `tsconfig.json` or `babel.config.js` for path aliases and base URL settings, ensuring imports are added correctly according to your project's structure.
 
-This extension contributes the following settings:
+## 📝 Example
 
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+Before running the extension:
 
-## Known Issues
+```javascript
+export default function MyComponent() {
+  return <Button>Click me</Button>;
+}
+```
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+After running the extension:
 
-## Release Notes
+```javascript
+import { Button } from '@/components/Button';
 
-Users appreciate release notes as you update your extension.
+export default function MyComponent() {
+  return <Button>Click me</Button>;
+}
+```
 
-### 1.0.0
+## 🤝 Contributing
 
-Initial release of ...
+Contributions are welcome! If you have any ideas, suggestions, or bug reports, please open an issue or submit a pull request on our [GitHub repository](https://github.com/devsphere-apps/expo-autopilot).
 
-### 1.0.1
 
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
-
----
-
-## Following extension guidelines
-
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+Enhance your coding efficiency with the Auto Import Extension and never worry about missing imports again!

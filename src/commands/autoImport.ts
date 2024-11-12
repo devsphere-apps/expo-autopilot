@@ -46,10 +46,13 @@ async function analyzeMissingImports(document: vscode.TextDocument): Promise<str
   );
 
   const usedIdentifiers = new Set<string>();
+  const currentFileExports = new Set<string>();
 
-  // Walk through the AST to find JSX elements and identifiers
+  // Walk through the AST to find all identifiers and exports
   function visit(node: ts.Node) {
-    if (ts.isJsxElement(node) || ts.isJsxSelfClosingElement(node)) {
+    if (ts.isIdentifier(node)) {
+      usedIdentifiers.add(node.getText());
+    } else if (ts.isJsxElement(node) || ts.isJsxSelfClosingElement(node)) {
       const tagName = ts.isJsxElement(node)
         ? node.openingElement.tagName.getText()
         : node.tagName.getText();
@@ -57,6 +60,21 @@ async function analyzeMissingImports(document: vscode.TextDocument): Promise<str
         usedIdentifiers.add(tagName);
       }
     }
+
+    // Detect exports in the current file
+    if (ts.isExportAssignment(node) || ts.isExportDeclaration(node)) {
+      const exportName = node.getText().match(/export\s+(default\s+)?(\w+)/)?.[2];
+      if (exportName) {
+        currentFileExports.add(exportName);
+      }
+    } else if (ts.isFunctionDeclaration(node) || ts.isClassDeclaration(node)) {
+      const name = node.name?.getText();
+      const isExported = node.modifiers?.some(m => m.kind === ts.SyntaxKind.ExportKeyword);
+      if (name && isExported) {
+        currentFileExports.add(name);
+      }
+    }
+
     ts.forEachChild(node, visit);
   }
 
@@ -80,7 +98,11 @@ async function analyzeMissingImports(document: vscode.TextDocument): Promise<str
     }
   });
 
-  const missingImports = Array.from(usedIdentifiers).filter(id => !existingImports.has(id));
+  // Exclude current file's exports from missing imports
+  const missingImports = Array.from(usedIdentifiers).filter(id => 
+    !existingImports.has(id) && !currentFileExports.has(id)
+  );
+
   console.log('Missing imports:', missingImports); // Debug log
   return missingImports;
 }
@@ -286,14 +308,14 @@ function getImportPaths(root: string, structure: 'src' | 'root'): string[] {
     const entries = fs.readdirSync(baseDir, { withFileTypes: true });
     
     // Filter for directories only and exclude certain folders
-    const excludedDirs = new Set(['node_modules', '.git','dist', 'build']);
+    const excludedDirs = new Set(['node_modules', '.git', 'dist', 'build']);
     
     entries.forEach(entry => {
       if (entry.isDirectory() && !excludedDirs.has(entry.name)) {
         const fullPath = path.join(baseDir, entry.name);
         paths.push(fullPath);
         
-        // Also check one level deeper for component libraries, etc.
+        // Also check one level deeper for component libraries, utils, constants, etc.
         try {
           const subEntries = fs.readdirSync(fullPath, { withFileTypes: true });
           subEntries.forEach(subEntry => {
@@ -318,27 +340,27 @@ async function addImports(editor: vscode.TextEditor, exports: ExportInfo[]): Pro
 
   // Group imports by their categories
   const importGroups = {
-    reactCore: new Map<string, { default: string[], named: string[] }>(),
+    react: new Map<string, { default: string[], named: string[] }>(),
+    reactNative: new Map<string, { default: string[], named: string[] }>(),
     thirdParty: new Map<string, { default: string[], named: string[] }>(),
-    appAlias: new Map<string, { default: string[], named: string[] }>(),
-    parentRelative: new Map<string, { default: string[], named: string[] }>(),
-    currentRelative: new Map<string, { default: string[], named: string[] }>(),
+    components: new Map<string, { default: string[], named: string[] }>(),
+    utils: new Map<string, { default: string[], named: string[] }>(),
   };
 
   exports.forEach(exp => {
     let targetGroup: Map<string, { default: string[], named: string[] }>;
 
     // Determine which group this import belongs to
-    if (exp.path.match(/^react(-native)?$/)) {
-      targetGroup = importGroups.reactCore;
+    if (exp.path === 'react') {
+      targetGroup = importGroups.react;
+    } else if (exp.path.startsWith('react-native')) {
+      targetGroup = importGroups.reactNative;
     } else if (exp.path.match(/^[^./]/)) {
       targetGroup = importGroups.thirdParty;
-    } else if (exp.path.startsWith('app/')) {
-      targetGroup = importGroups.appAlias;
-    } else if (exp.path.startsWith('../')) {
-      targetGroup = importGroups.parentRelative;
+    } else if (exp.path.startsWith('@/components') || exp.path.startsWith('@/screens')) {
+      targetGroup = importGroups.components;
     } else {
-      targetGroup = importGroups.currentRelative;
+      targetGroup = importGroups.utils;
     }
 
     const group = targetGroup.get(exp.path) || { default: [], named: [] };
@@ -371,29 +393,33 @@ async function addImports(editor: vscode.TextEditor, exports: ExportInfo[]): Pro
       return statements.sort().join('\n');
     };
 
-    // 1. React and React Native imports
-    if (importGroups.reactCore.size > 0) {
-      importStatements += addGroupImports(importGroups.reactCore) + '\n\n';
+    // 1. React imports
+    if (importGroups.react.size > 0) {
+      importStatements += addGroupImports(importGroups.react) + '\n';
     }
 
-    // 2. Third-party modules
+    // 2. React Native imports
+    if (importGroups.reactNative.size > 0) {
+      if (importStatements) importStatements += '\n';
+      importStatements += addGroupImports(importGroups.reactNative) + '\n';
+    }
+
+    // 3. Third-party modules
     if (importGroups.thirdParty.size > 0) {
-      importStatements += addGroupImports(importGroups.thirdParty) + '\n\n';
+      if (importStatements) importStatements += '\n';
+      importStatements += addGroupImports(importGroups.thirdParty) + '\n';
     }
 
-    // 3. App alias imports
-    if (importGroups.appAlias.size > 0) {
-      importStatements += addGroupImports(importGroups.appAlias) + '\n\n';
+    // 4. Components/Screens
+    if (importGroups.components.size > 0) {
+      if (importStatements) importStatements += '\n';
+      importStatements += addGroupImports(importGroups.components) + '\n';
     }
 
-    // 4. Parent directory relative imports
-    if (importGroups.parentRelative.size > 0) {
-      importStatements += addGroupImports(importGroups.parentRelative) + '\n\n';
-    }
-
-    // 5. Current directory relative imports
-    if (importGroups.currentRelative.size > 0) {
-      importStatements += addGroupImports(importGroups.currentRelative) + '\n';
+    // 5. Utils/Helpers/APIs
+    if (importGroups.utils.size > 0) {
+      if (importStatements) importStatements += '\n';
+      importStatements += addGroupImports(importGroups.utils) + '\n';
     }
 
     // Add all imports at the start of the file
