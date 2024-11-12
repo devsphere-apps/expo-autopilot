@@ -1,6 +1,6 @@
-# Auto Import Extension for VSCode
+# Auto Import Extension for Expo Router Projects in VSCode
 
-Welcome to the **Auto Import Extension** for Visual Studio Code! This powerful tool is designed to streamline your development workflow by automatically detecting and importing missing modules, components, utilities, and more in your TypeScript and JavaScript projects.
+Welcome to the **Auto Import Extension** for Visual Studio Code, specifically crafted for Expo Router projects! This powerful tool is designed to streamline your development workflow by automatically detecting and importing missing modules, components, utilities, and more in your Expo Router-based TypeScript and JavaScript projects.
 
 ## 🚀 Features
 
@@ -20,7 +20,7 @@ Welcome to the **Auto Import Extension** for Visual Studio Code! This powerful t
 
 1. Open Visual Studio Code.
 2. Go to the Extensions view by clicking on the Extensions icon in the Activity Bar on the side of the window or by pressing `Ctrl+Shift+X`.
-3. Search for "Auto Import Extension" and click Install.
+3. Search for "Auto Import Extension for Expo Router" and click Install.
 
 ## 🖱️ Usage
 
