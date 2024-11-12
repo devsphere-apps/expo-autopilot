@@ -316,37 +316,89 @@ function getImportPaths(root: string, structure: 'src' | 'root'): string[] {
 async function addImports(editor: vscode.TextEditor, exports: ExportInfo[]): Promise<void> {
   if (!exports.length) return;
 
-  // Group imports by type and path
+  // Group imports by their categories
   const importGroups = {
-    react: new Map<string, { default: string[], named: string[] }>()
+    reactCore: new Map<string, { default: string[], named: string[] }>(),
+    thirdParty: new Map<string, { default: string[], named: string[] }>(),
+    appAlias: new Map<string, { default: string[], named: string[] }>(),
+    parentRelative: new Map<string, { default: string[], named: string[] }>(),
+    currentRelative: new Map<string, { default: string[], named: string[] }>(),
   };
 
   exports.forEach(exp => {
-    const group = importGroups.react.get(exp.path) || { default: [], named: [] };
+    let targetGroup: Map<string, { default: string[], named: string[] }>;
+
+    // Determine which group this import belongs to
+    if (exp.path.match(/^react(-native)?$/)) {
+      targetGroup = importGroups.reactCore;
+    } else if (exp.path.match(/^[^./]/)) {
+      targetGroup = importGroups.thirdParty;
+    } else if (exp.path.startsWith('app/')) {
+      targetGroup = importGroups.appAlias;
+    } else if (exp.path.startsWith('../')) {
+      targetGroup = importGroups.parentRelative;
+    } else {
+      targetGroup = importGroups.currentRelative;
+    }
+
+    const group = targetGroup.get(exp.path) || { default: [], named: [] };
     if (exp.isDefault) {
       group.default.push(exp.name);
     } else {
       group.named.push(exp.name);
     }
-    importGroups.react.set(exp.path, group);
+    targetGroup.set(exp.path, group);
   });
 
   await editor.edit(editBuilder => {
     const firstLine = editor.document.lineAt(0);
-    
-    // Add imports grouped by type and path
-    importGroups.react.forEach((group, filePath) => {
-      let importStatement = '';
-      
-      if (group.default.length && group.named.length) {
-        importStatement = `import ${group.default[0]}, { ${group.named.join(', ')} } from '${filePath}';\n`;
-      } else if (group.default.length) {
-        importStatement = `import ${group.default[0]} from '${filePath}';\n`;
-      } else {
-        importStatement = `import { ${group.named.join(', ')} } from '${filePath}';\n`;
-      }
-      
-      editBuilder.insert(firstLine.range.start, importStatement);
-    });
+    let importStatements = '';
+
+    // Function to create import statements for a group
+    const addGroupImports = (group: Map<string, { default: string[], named: string[] }>) => {
+      const statements: string[] = [];
+      group.forEach((imports, path) => {
+        if (imports.default.length && imports.named.length) {
+          statements.push(
+            `import ${imports.default[0]}, { ${imports.named.sort().join(', ')} } from '${path}';`
+          );
+        } else if (imports.default.length) {
+          statements.push(`import ${imports.default[0]} from '${path}';`);
+        } else {
+          statements.push(`import { ${imports.named.sort().join(', ')} } from '${path}';`);
+        }
+      });
+      return statements.sort().join('\n');
+    };
+
+    // 1. React and React Native imports
+    if (importGroups.reactCore.size > 0) {
+      importStatements += addGroupImports(importGroups.reactCore) + '\n\n';
+    }
+
+    // 2. Third-party modules
+    if (importGroups.thirdParty.size > 0) {
+      importStatements += addGroupImports(importGroups.thirdParty) + '\n\n';
+    }
+
+    // 3. App alias imports
+    if (importGroups.appAlias.size > 0) {
+      importStatements += addGroupImports(importGroups.appAlias) + '\n\n';
+    }
+
+    // 4. Parent directory relative imports
+    if (importGroups.parentRelative.size > 0) {
+      importStatements += addGroupImports(importGroups.parentRelative) + '\n\n';
+    }
+
+    // 5. Current directory relative imports
+    if (importGroups.currentRelative.size > 0) {
+      importStatements += addGroupImports(importGroups.currentRelative) + '\n';
+    }
+
+    // Add all imports at the start of the file
+    if (importStatements) {
+      editBuilder.insert(firstLine.range.start, importStatements.trim() + '\n');
+    }
   });
 }
