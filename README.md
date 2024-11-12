@@ -20,7 +20,7 @@ Welcome to the **Auto Import Extension** for Visual Studio Code, specifically cr
 
 1. Open Visual Studio Code.
 2. Go to the Extensions view by clicking on the Extensions icon in the Activity Bar on the side of the window or by pressing `Ctrl+Shift+X`.
-3. Search for "Auto Import Extension for Expo Router" and click Install.
+3. Search for "Expo Autopilot" and click Install.
 
 ## 🖱️ Usage
 
