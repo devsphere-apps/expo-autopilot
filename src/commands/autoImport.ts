@@ -90,8 +90,100 @@ function isPascalCase(str: string): boolean {
   return /^[A-Z][a-zA-Z0-9]*$/.test(str);
 }
 
+interface PathAlias {
+  prefix: string;
+  paths: string[];
+}
+
+interface ProjectConfig {
+  useAliases: boolean;
+  baseUrl?: string;
+  aliases?: PathAlias[];
+}
+
+async function getProjectConfig(workspaceRoot: string): Promise<ProjectConfig> {
+  try {
+    // Check tsconfig.json first
+    const tsconfigPath = path.join(workspaceRoot, 'tsconfig.json');
+    if (fs.existsSync(tsconfigPath)) {
+      const tsconfig = JSON.parse(fs.readFileSync(tsconfigPath, 'utf8'));
+      const compilerOptions = tsconfig.compilerOptions;
+
+      if (compilerOptions?.paths) {
+        const aliases: PathAlias[] = [];
+        
+        // Convert all path mappings to aliases
+        Object.entries(compilerOptions.paths).forEach(([key, value]) => {
+          // Convert path patterns like "@/*" to "@/"
+          const prefix = key.replace(/\/\*$/, '/');
+          const paths = (value as string[]).map(p => p.replace(/\/\*$/, ''));
+          
+          aliases.push({ prefix, paths });
+        });
+
+        return {
+          useAliases: true,
+          baseUrl: compilerOptions.baseUrl || '.',
+          aliases
+        };
+      }
+    }
+
+    // Default to relative imports if no alias configuration found
+    return { useAliases: false };
+  } catch (error) {
+    console.error('Error reading project config:', error);
+    return { useAliases: false };
+  }
+}
+
+function getImportPath(
+  fromFile: string,
+  toFile: string,
+  config: ProjectConfig,
+  projectRoot: string
+): string {
+  if (config.useAliases && config.aliases) {
+    // Get the path relative to project root
+    const relativePath = path.relative(projectRoot, toFile)
+      .replace(/\.[^/.]+$/, ''); // Remove extension
+
+    // Try each alias pattern
+    for (const alias of config.aliases) {
+      for (const aliasPath of alias.paths) {
+        const fullAliasPath = path.join(projectRoot, config.baseUrl || '.', aliasPath);
+        const normalizedAliasPath = path.normalize(fullAliasPath);
+        const normalizedFilePath = path.normalize(path.dirname(toFile));
+
+        if (normalizedFilePath.startsWith(normalizedAliasPath)) {
+          // Replace the alias path with the alias prefix
+          const importPath = relativePath
+            .replace(path.relative(projectRoot, normalizedAliasPath), alias.prefix)
+            .replace(/\\/g, '/'); // Convert Windows paths to forward slashes
+          
+          return importPath;
+        }
+      }
+    }
+  }
+
+  // Fall back to relative path if no alias matches or aliases aren't used
+  let relativePath = path.relative(path.dirname(fromFile), toFile)
+    .replace(/\.[^/.]+$/, '') // Remove extension
+    .replace(/\\/g, '/'); // Convert Windows paths to forward slashes
+
+  // Ensure path starts with ./ or ../
+  if (!relativePath.startsWith('.')) {
+    relativePath = './' + relativePath;
+  }
+
+  return relativePath;
+}
+
 async function findExportsInProject(paths: string[], identifiers: string[]): Promise<ExportInfo[]> {
-  const exports: Map<string, ExportInfo> = new Map(); // Use Map to avoid duplicates
+  const exports: Map<string, ExportInfo> = new Map();
+  const workspaceRoot = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+  const config = await getProjectConfig(workspaceRoot!);
 
   for (const folderPath of paths) {
     const files = await vscode.workspace.findFiles(
@@ -151,19 +243,17 @@ async function findExportsInProject(paths: string[], identifiers: string[]): Pro
         });
 
         if (isDefault || isNamed) {
-          // Calculate relative path from current file to the export file
-          const currentDir = path.dirname(vscode.window.activeTextEditor!.document.uri.fsPath);
-          let relativePath = path.relative(currentDir, file.fsPath)
-            .replace(/\.[^/.]+$/, ''); // Remove extension
-          
-          // Ensure path starts with ./ or ../
-          if (!relativePath.startsWith('.')) {
-            relativePath = `./${relativePath}`;
-          }
+          const currentFile = vscode.window.activeTextEditor!.document.uri.fsPath;
+          const importPath = getImportPath(
+            currentFile,
+            file.fsPath,
+            config,
+            workspaceRoot!
+          );
 
           exports.set(identifier, {
             name: identifier,
-            path: relativePath,
+            path: importPath,
             isDefault: isDefault
           });
         }
@@ -226,24 +316,26 @@ function getImportPaths(root: string, structure: 'src' | 'root'): string[] {
 async function addImports(editor: vscode.TextEditor, exports: ExportInfo[]): Promise<void> {
   if (!exports.length) return;
 
-  // Group imports by file path
-  const importGroups = new Map<string, { default: string[], named: string[] }>();
-  
+  // Group imports by type and path
+  const importGroups = {
+    react: new Map<string, { default: string[], named: string[] }>()
+  };
+
   exports.forEach(exp => {
-    const group = importGroups.get(exp.path) || { default: [], named: [] };
+    const group = importGroups.react.get(exp.path) || { default: [], named: [] };
     if (exp.isDefault) {
       group.default.push(exp.name);
     } else {
       group.named.push(exp.name);
     }
-    importGroups.set(exp.path, group);
+    importGroups.react.set(exp.path, group);
   });
 
   await editor.edit(editBuilder => {
     const firstLine = editor.document.lineAt(0);
     
-    // Add imports grouped by file
-    importGroups.forEach((group, filePath) => {
+    // Add imports grouped by type and path
+    importGroups.react.forEach((group, filePath) => {
       let importStatement = '';
       
       if (group.default.length && group.named.length) {
