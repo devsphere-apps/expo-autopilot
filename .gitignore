@@ -1,5 +1,29 @@
-out
-dist
-node_modules
-.vscode-test/
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Testing
+coverage/
+
+# Production
+out/
+dist/
 *.vsix
+
+# Development
+.vscode-test/
+.vscode/
+.idea/
+*.log
+
+# Environment
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# OS
+.DS_Store
+Thumbs.db
