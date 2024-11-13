@@ -11,6 +11,7 @@ A powerful VSCode extension designed specifically for Expo Router projects, offe
 - [Configuration](#-configuration)
 - [Examples](#-examples)
 - [Contributing](#-contributing)
+- [Support Expo Autopilot](#-support-expo-autopilot)
 
 ## ✨ Features
 
@@ -140,6 +141,31 @@ Visit our [GitHub repository](https://github.com/devsphere-apps/expo-autopilot) 
 ## 📝 License
 
 MIT License - feel free to use in your projects!
+
+## 💖 Support Expo Autopilot
+
+Expo Autopilot is **100% free and open source**! If you find it valuable, consider:
+
+### ☕ Quick Support Options
+- [Ko-fi Donation](https://ko-fi.com/devsphereapps) ($3-$5)
+
+### 🌟 GitHub Sponsors
+Support ongoing development:
+- 💝 Supporter ($5/month)
+  - Name in README
+  - Priority issue response
+- 💎 Premium Supporter ($10/month)
+  - All Supporter benefits
+  - Custom import rule consultation
+  - Direct support channel
+
+[Become a Sponsor](https://github.com/sponsors/your-username) →
+
+### 🏢 For Companies
+Using Expo Autopilot in your company?
+- Consider monthly sponsorship
+- Share your success story
+- Consulting services available
 
 ---
 
