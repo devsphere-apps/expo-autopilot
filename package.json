@@ -26,6 +26,14 @@
       {
         "command": "extension.autoImport",
         "title": "Auto Import"
+      },
+      {
+        "command": "extension.organizeImports",
+        "title": "Organize Imports"
+      },
+      {
+        "command": "extension.navigateToRoute",
+        "title": "Navigate to Route"
       }
     ],
     "keybindings": [
@@ -33,6 +41,18 @@
         "command": "extension.autoImport",
         "key": "ctrl+shift+i",
         "mac": "cmd+shift+i",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "extension.organizeImports",
+        "key": "ctrl+shift+o",
+        "mac": "cmd+shift+o",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "extension.navigateToRoute",
+        "key": "ctrl+shift+r",
+        "mac": "cmd+shift+r",
         "when": "editorTextFocus"
       }
     ]

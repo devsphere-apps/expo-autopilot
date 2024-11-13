@@ -336,31 +336,34 @@ function getImportPaths(root: string, structure: 'src' | 'root'): string[] {
 }
 
 async function addImports(editor: vscode.TextEditor, exports: ExportInfo[]): Promise<void> {
-  if (!exports.length) {return;}
+  if (!exports.length) return;
 
-  // Group imports by their categories
+  // Group imports by their categories following the specified order
   const importGroups = {
-    react: new Map<string, { default: string[], named: string[] }>(),
-    reactNative: new Map<string, { default: string[], named: string[] }>(),
-    thirdParty: new Map<string, { default: string[], named: string[] }>(),
-    components: new Map<string, { default: string[], named: string[] }>(),
-    utils: new Map<string, { default: string[], named: string[] }>(),
+    react: new Map<string, { default: string[], named: string[] }>(),        // react
+    reactNative: new Map<string, { default: string[], named: string[] }>(),  // react-native
+    thirdParty: new Map<string, { default: string[], named: string[] }>(),   // third party modules
+    appAlias: new Map<string, { default: string[], named: string[] }>(),     // app/* imports
+    parentRelative: new Map<string, { default: string[], named: string[] }>(), // ../* imports
+    currentRelative: new Map<string, { default: string[], named: string[] }>(), // ./* imports
   };
 
   exports.forEach(exp => {
     let targetGroup: Map<string, { default: string[], named: string[] }>;
 
-    // Determine which group this import belongs to
+    // Determine which group this import belongs to based on the path
     if (exp.path === 'react') {
       targetGroup = importGroups.react;
-    } else if (exp.path.startsWith('react-native')) {
+    } else if (exp.path === 'react-native' || exp.path.startsWith('react-native/')) {
       targetGroup = importGroups.reactNative;
-    } else if (exp.path.match(/^[^./]/)) {
+    } else if (!exp.path.startsWith('.') && !exp.path.startsWith('@')) {
       targetGroup = importGroups.thirdParty;
-    } else if (exp.path.startsWith('@/components') || exp.path.startsWith('@/screens')) {
-      targetGroup = importGroups.components;
+    } else if (exp.path.startsWith('@/')) {
+      targetGroup = importGroups.appAlias;
+    } else if (exp.path.startsWith('../')) {
+      targetGroup = importGroups.parentRelative;
     } else {
-      targetGroup = importGroups.utils;
+      targetGroup = importGroups.currentRelative;
     }
 
     const group = targetGroup.get(exp.path) || { default: [], named: [] };
@@ -393,46 +396,44 @@ async function addImports(editor: vscode.TextEditor, exports: ExportInfo[]): Pro
       return statements.sort().join('\n');
     };
 
+    // Add imports in the specified order with proper spacing
+    const addGroupWithSpacing = (group: Map<string, { default: string[], named: string[] }>) => {
+      if (group.size > 0) {
+        if (importStatements) {
+          importStatements += '\n\n';
+        }
+        importStatements += addGroupImports(group);
+      }
+    };
+
     // 1. React imports
     if (importGroups.react.size > 0) {
-      importStatements += addGroupImports(importGroups.react) + '\n';
+      importStatements += addGroupImports(importGroups.react);
     }
 
-    // 2. React Native imports
+    // 2. React Native imports (add with spacing if there were React imports)
     if (importGroups.reactNative.size > 0) {
       if (importStatements) {
         importStatements += '\n';
       }
-      importStatements += addGroupImports(importGroups.reactNative) + '\n';
+      importStatements += addGroupImports(importGroups.reactNative);
     }
 
     // 3. Third-party modules
-    if (importGroups.thirdParty.size > 0) {
-      if (importStatements) {
-        importStatements += '\n';
-      }
-      importStatements += addGroupImports(importGroups.thirdParty) + '\n';
-    }
+    addGroupWithSpacing(importGroups.thirdParty);
 
-    // 4. Components/Screens
-    if (importGroups.components.size > 0) {
-      if (importStatements) {
-        importStatements += '\n';
-      }
-      importStatements += addGroupImports(importGroups.components) + '\n';
-    }
+    // 4. App alias imports (@/*)
+    addGroupWithSpacing(importGroups.appAlias);
 
-    // 5. Utils/Helpers/APIs
-    if (importGroups.utils.size > 0) {
-      if (importStatements) {
-        importStatements += '\n';
-      }
-      importStatements += addGroupImports(importGroups.utils) + '\n';
-    }
+    // 5. Parent relative imports (../)
+    addGroupWithSpacing(importGroups.parentRelative);
+
+    // 6. Current directory imports (./)
+    addGroupWithSpacing(importGroups.currentRelative);
 
     // Add all imports at the start of the file
     if (importStatements) {
-      editBuilder.insert(firstLine.range.start, importStatements.trim() + '\n');
+      editBuilder.insert(firstLine.range.start, importStatements + '\n\n');
     }
   });
 }
