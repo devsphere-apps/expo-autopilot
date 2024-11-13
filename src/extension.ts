@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { registerAutoImport } from './commands/autoImport';
 import { registerOrganizeImports } from './commands/organizeImports';
 import { activate as activateNavigateToRoute } from './commands/navigateToRoute';
+import { ImportOrderDiagnostics } from './diagnostics/importOrderDiagnostics';
 
 export function activate(context: vscode.ExtensionContext) {
   try {
@@ -14,10 +15,14 @@ export function activate(context: vscode.ExtensionContext) {
     // Register the navigate-to-route command
     activateNavigateToRoute(context);
 
+    // Initialize import order diagnostics
+    const importDiagnostics = new ImportOrderDiagnostics();
+    importDiagnostics.activate(context);
+    context.subscriptions.push(importDiagnostics);
+
     // Show success message when extension is activated
     vscode.window.showInformationMessage('Expo Autopilot is now active!');
   } catch (error) {
-    // Log and show error if registration fails
     console.error('Error activating Expo Autopilot:', error);
     vscode.window.showErrorMessage('Failed to activate Expo Autopilot: ' + (error as Error).message);
   }

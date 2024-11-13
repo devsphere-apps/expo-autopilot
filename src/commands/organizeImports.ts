@@ -13,7 +13,7 @@ export function registerOrganizeImports(context: vscode.ExtensionContext) {
       vscode.window.showInformationMessage('Imports organized successfully!');
     } catch (error) {
       console.error('Error organizing imports:', error);
-      vscode.window.showErrorMessage('Error organizing imports: ' + error.message);
+      vscode.window.showErrorMessage('Error organizing imports: ' + (error as Error).message);
     }
   });
 
