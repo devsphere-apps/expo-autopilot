@@ -1,49 +1,109 @@
-# Auto Import Extension for Expo Router Projects in VSCode
+# 🚀 Expo Autopilot - Smart Import Management for Expo Router Projects
 
-Welcome to the **Auto Import Extension** for Visual Studio Code, specifically crafted for Expo Router projects! This powerful tool is designed to streamline your development workflow by automatically detecting and importing missing modules, components, utilities, and more in your Expo Router-based TypeScript and JavaScript projects.
+A powerful VSCode extension designed specifically for Expo Router projects, offering intelligent import management, real-time diagnostics, and automated organization features.
 
-## 🚀 Features
+## 📑 Table of Contents
+- [Features](#-features)
+- [Installation](#-installation)
+- [Usage](#-usage)
+- [Import Order Rules](#-import-order-rules)
+- [Commands & Shortcuts](#-commands--shortcuts)
+- [Configuration](#-configuration)
+- [Examples](#-examples)
+- [Contributing](#-contributing)
 
-- **Automatic Import Detection**: Scans your open file for any missing imports and automatically adds them.
-- **Supports All File Types**: Whether it's a React component, utility function, API module, or constant, this extension has you covered.
-- **Smart Import Grouping**: Organizes imports into logical groups, such as React, third-party libraries, and local modules, following best practices.
-- **Alias and Relative Path Support**: Handles both alias-based and relative imports seamlessly, respecting your project's configuration.
-- **Customizable Import Order**: Ensures imports are ordered according to your preferred structure, enhancing code readability.
+## ✨ Features
 
-## 🛠️ How It Works
+### 🎯 Auto Import Detection
+- Real-time detection of missing imports
+- Support for components, utilities, APIs, and constants
+- Smart path resolution with alias support
+- TypeScript and JavaScript compatibility
 
-1. **Analyze**: The extension analyzes your current file to identify any used identifiers that are not yet imported.
-2. **Search**: It searches through your project directories to find matching exports for these identifiers.
-3. **Import**: Automatically adds the necessary import statements at the top of your file, organized and formatted.
+### 📦 Import Organization
+- Automatic import grouping and ordering
+- Real-time diagnostics for import order issues
+- Visual indicators for unorganized imports
+- One-click import organization
 
-## 📦 Installation
+### 🎨 Visual Diagnostics
+- Interactive hover messages with quick fixes
+- Color-coded import groups
+- Clear visual indicators for import order issues
+- OS-specific keyboard shortcut hints
 
-1. Open Visual Studio Code.
-2. Go to the Extensions view by clicking on the Extensions icon in the Activity Bar on the side of the window or by pressing `Ctrl+Shift+X`.
-3. Search for "Expo Autopilot" and click Install.
+## 📥 Installation
 
-## 🖱️ Usage
+1. Open Visual Studio Code
+2. Access Extensions (Ctrl+Shift+X / Cmd+Shift+X)
+3. Search for "Expo Autopilot"
+4. Click Install
 
-- **Command Palette**: Open the Command Palette (`Ctrl+Shift+P` or `Cmd+Shift+P` on macOS), type "Auto Import", and select the command to run it.
-- **Keyboard Shortcut**: Use the default shortcut `Ctrl+Shift+I` (or `Cmd+Shift+I` on macOS) to trigger the auto-import functionality.
+## 🎮 Usage
+
+### Auto Import
+- Command Palette: `Auto Import`
+- Shortcut: `Ctrl+Shift+I` (Windows/Linux) or `Cmd+Shift+I` (macOS)
+
+### Organize Imports
+- Command Palette: `Organize Imports`
+- Shortcut: `Ctrl+Shift+O` (Windows/Linux) or `Cmd+Shift+O` (macOS)
+
+## 📐 Import Order Rules
+
+The extension enforces a standardized import order:
+
+1. **React Imports** 🔵
+   ```typescript
+   import React from 'react';
+   ```
+
+2. **React Native Imports** 🟦
+   ```typescript
+   import { View, Text } from 'react-native';
+   ```
+
+3. **Third Party Imports** 🟨
+   ```typescript
+   import { Tabs } from 'expo-router';
+   ```
+
+4. **App Imports (@/*)** 🟩
+   ```typescript
+   import { Button } from '@/components/Button';
+   ```
+
+5. **Relative Imports (./)** 🟫
+   ```typescript
+   import { utils } from './utils';
+   ```
+
+## ⌨️ Commands & Shortcuts
+
+| Command | Windows/Linux | macOS | Description |
+|---------|--------------|-------|-------------|
+| Auto Import | `Ctrl+Shift+I` | `Cmd+Shift+I` | Detect and add missing imports |
+| Organize Imports | `Ctrl+Shift+O` | `Cmd+Shift+O` | Organize imports according to rules |
 
 ## ⚙️ Configuration
 
-The extension respects your project's `tsconfig.json` or `babel.config.js` for path aliases and base URL settings, ensuring imports are added correctly according to your project's structure.
+The extension automatically respects your project's configuration:
+- `tsconfig.json` for TypeScript path aliases
+- `babel.config.js` for Babel module resolver
+- Expo Router project structure
 
-## 📝 Example
+## 💡 Examples
 
-Before running the extension:
-
-```javascript
+### Auto Import Feature
+Before:
+```typescript
 export default function MyComponent() {
   return <Button>Click me</Button>;
 }
 ```
 
-After running the extension:
-
-```javascript
+After:
+```typescript
 import { Button } from '@/components/Button';
 
 export default function MyComponent() {
@@ -51,9 +111,36 @@ export default function MyComponent() {
 }
 ```
 
+### Import Organization
+Before:
+```typescript
+import { Button } from '@/components/Button';
+import React from 'react';
+import { View } from 'react-native';
+```
+
+After:
+```typescript
+import React from 'react';
+
+import { View } from 'react-native';
+
+import { Button } from '@/components/Button';
+```
+
 ## 🤝 Contributing
 
-Contributions are welcome! If you have any ideas, suggestions, or bug reports, please open an issue or submit a pull request on our [GitHub repository](https://github.com/devsphere-apps/expo-autopilot).
+We welcome contributions! Feel free to:
+- Report issues
+- Suggest features
+- Submit pull requests
 
+Visit our [GitHub repository](https://github.com/devsphere-apps/expo-autopilot) to get started.
 
-Enhance your coding efficiency with the Auto Import Extension and never worry about missing imports again!
+## 📝 License
+
+MIT License - feel free to use in your projects!
+
+---
+
+Made with ❤️ for the Expo Router community. Happy coding! 🚀
