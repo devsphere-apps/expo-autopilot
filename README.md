@@ -142,30 +142,27 @@ Visit our [GitHub repository](https://github.com/devsphere-apps/expo-autopilot) 
 
 MIT License - feel free to use in your projects!
 
+## 👨‍💻 About the Author
+
+Hi! I'm Abdul Mateen, a passionate developer focused on creating tools that make development workflows smoother and more efficient.
+
+- 🔭 Currently working on improving Expo Router developer experience
+- 🌱 Specialized in React Native and Expo ecosystem
+- 💬 Let's connect and discuss ideas!
+  - 🐦 [Twitter](https://x.com/mateenchitrali)
+  - 💼 [LinkedIn](https://www.linkedin.com/in/abdulmateenchitrali/)
+
 ## 💖 Support Expo Autopilot
 
-Expo Autopilot is **100% free and open source**! If you find it valuable, consider:
+Expo Autopilot is **100% free and open source**! If you find it valuable:
 
-### ☕ Quick Support Options
-- [Ko-fi Donation](https://ko-fi.com/devsphereapps) ($3-$5)
+- ⭐ Star the project on GitHub
+- 🐦 Follow me on [X / Twitter](https://x.com/mateenchitrali)
+- 💼 Connect on [LinkedIn](https://www.linkedin.com/in/abdulmateenchitrali/)
+- 📢 Share your experience with others
+- 🐛 Report bugs and suggest features
 
-### 🌟 GitHub Sponsors
-Support ongoing development:
-- 💝 Supporter ($5/month)
-  - Name in README
-  - Priority issue response
-- 💎 Premium Supporter ($10/month)
-  - All Supporter benefits
-  - Custom import rule consultation
-  - Direct support channel
-
-[Become a Sponsor](https://github.com/sponsors/your-username) →
-
-### 🏢 For Companies
-Using Expo Autopilot in your company?
-- Consider monthly sponsorship
-- Share your success story
-- Consulting services available
+Your support helps keep this project active and continuously improving!
 
 ---
 

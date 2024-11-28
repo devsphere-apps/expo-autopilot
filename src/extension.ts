@@ -3,6 +3,9 @@ import { registerAutoImport } from './commands/autoImport';
 import { registerOrganizeImports } from './commands/organizeImports';
 import { activate as activateNavigateToRoute } from './commands/navigateToRoute';
 import { ImportOrderDiagnostics } from './diagnostics/importOrderDiagnostics';
+import { AchievementSystem } from './features/fun/achievements';
+import { calculateLinesReduced, StatsTracker } from './features/fun/stats';
+import { ImportStatusBar } from './features/fun/statusBar';
 
 export function activate(context: vscode.ExtensionContext) {
   try {
@@ -20,16 +23,29 @@ export function activate(context: vscode.ExtensionContext) {
     importDiagnostics.activate(context);
     context.subscriptions.push(importDiagnostics);
 
-    // Add a small sponsor button in the status bar
-    const sponsorButton = vscode.window.createStatusBarItem(
-      vscode.StatusBarAlignment.Right,
-      100
-    );
+    // Initialize fun features
+    const achievements = AchievementSystem.initialize(context);
+    const stats = StatsTracker.initialize(context);
+    ImportStatusBar.initialize();
 
-    sponsorButton.text = "$(heart) Sponsor";
-    sponsorButton.tooltip = "Support Expo Autopilot Development";
-    sponsorButton.command = 'vscode.open(vscode.Uri.parse("https://github.com/sponsors/devsphere-apps"))';
-    sponsorButton.show();
+    // Add to your existing organizeImports command
+    let disposable = vscode.commands.registerCommand('extension.organizeImports', async () => {
+      // Get original imports before changes
+      const originalImports = getImportSection(vscode.window.activeTextEditor?.document.getText() || '');
+      
+      // Execute organize imports command
+      await vscode.commands.executeCommand('editor.action.organizeImports');
+      const updatedText = vscode.window.activeTextEditor?.document.getText() || '';
+      
+      // After successful organization:
+      const updatedImports = getImportSection(updatedText);
+      const linesReduced = calculateLinesReduced(originalImports, updatedImports);
+      stats.updateStats(linesReduced);
+      achievements.checkAchievements(stats.getStats());
+      ImportStatusBar.updateStatus(stats.getStats());
+    });
+
+    context.subscriptions.push(disposable);
 
     // Show success message when extension is activated
     vscode.window.showInformationMessage('Expo Autopilot is now active!');
@@ -41,4 +57,11 @@ export function activate(context: vscode.ExtensionContext) {
 
 export function deactivate() {
   // Cleanup code if needed when extension is deactivated
+}
+
+function getImportSection(text: string): string {
+  const importLines = text.split('\n')
+    .filter(line => line.trim().startsWith('import'))
+    .join('\n');
+  return importLines;
 }

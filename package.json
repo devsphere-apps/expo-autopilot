@@ -2,14 +2,14 @@
   "name": "expo-autopilot",
   "displayName": "Expo Autopilot",
   "description": "Expo Autopilot – Effortless navigation and auto-imports for Expo developers. Boost productivity and streamline your workflow in VSCode. 🚀",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "license": "MIT",
   "icon": "assets/icon.png",
   "repository": {
     "type": "git",
     "url": "https://github.com/devsphere-apps/expo-autopilot"
   },
-  "publisher": "Abdul Mateen",
+  "publisher": "AbdulMateen",
   "engines": {
     "vscode": "^1.95.0"
   },
@@ -34,6 +34,10 @@
       {
         "command": "extension.navigateToRoute",
         "title": "Navigate to Route"
+      },
+      {
+        "command": "extension.showImportStats",
+        "title": "Expo: Show Import Stats"
       }
     ],
     "keybindings": [
@@ -53,6 +57,12 @@
         "command": "extension.navigateToRoute",
         "key": "ctrl+shift+r",
         "mac": "cmd+shift+r",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "extension.showImportStats",
+        "key": "ctrl+alt+i",
+        "mac": "cmd+alt+i",
         "when": "editorTextFocus"
       }
     ]

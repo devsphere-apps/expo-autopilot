@@ -74,9 +74,9 @@ async function findRoutes(appDir: string): Promise<RouteInfo[]> {
         let routeType: RouteInfo['type'] = 'screen';
 
         // Determine route type based on directory name
-        if (routeName.startsWith('(')) routeType = 'group';
-        if (routeName.startsWith('[')) routeType = 'modal';
-        if (routeName === '(tabs)') routeType = 'tab';
+        if (routeName.startsWith('(')) {routeType = 'group';}
+        if (routeName.startsWith('[')) {routeType = 'modal';}
+        if (routeName === '(tabs)') {routeType = 'tab';}
 
         routes.push({
           path: fullPath,

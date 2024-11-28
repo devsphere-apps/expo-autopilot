@@ -336,7 +336,7 @@ function getImportPaths(root: string, structure: 'src' | 'root'): string[] {
 }
 
 async function addImports(editor: vscode.TextEditor, exports: ExportInfo[]): Promise<void> {
-  if (!exports.length) return;
+  if (!exports.length) {return;}
 
   // Group imports by their categories following the specified order
   const importGroups = {

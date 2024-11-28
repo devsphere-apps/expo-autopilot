@@ -145,10 +145,10 @@ export class ImportOrderDiagnostics {
     }
 
     const getGroupOrder = (path: string): number => {
-      if (path === 'react') return 0;
-      if (path === 'react-native') return 1;
-      if (!path.startsWith('.') && !path.startsWith('@/')) return 2;
-      if (path.startsWith('@/')) return 3;
+      if (path === 'react') {return 0;}
+      if (path === 'react-native') {return 1;}
+      if (!path.startsWith('.') && !path.startsWith('@/')) {return 2;}
+      if (path.startsWith('@/')) {return 3;}
       return 4;
     };
 
